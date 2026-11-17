@@ -118,8 +118,8 @@ button,input{font:inherit;color:inherit}
 .nt{white-space:nowrap}
 .nt.lg{background:var(--honey);color:var(--honey-ink);border-radius:.3em;padding:0 .38em}
 .nt.lg sup{color:inherit}
-.nt.lo{text-decoration:underline;text-decoration-color:var(--caramel);text-decoration-thickness:2.5px;text-underline-offset:5px}
-.nt.hi{text-decoration:overline;text-decoration-color:var(--caramel);text-decoration-thickness:2.5px}
+.nt.lo{text-decoration:overline;text-decoration-color:var(--caramel);text-decoration-thickness:2.5px}
+.nt.hi{text-decoration:underline;text-decoration-color:var(--caramel);text-decoration-thickness:2.5px;text-underline-offset:5px}
 .lab{font-size:.62em;background:var(--caramel);color:var(--surface);border-radius:5px;padding:.1em .55em;font-weight:700}
 .x{font-size:.7em;color:var(--caramel)}
 .rep{break-inside:avoid;font-size:.72em;background:var(--card);color:var(--deep);border-radius:9px;padding:.35em .8em;display:inline-flex;gap:6px;align-items:center;margin-bottom:.5em}
@@ -219,7 +219,7 @@ function songCard(s,n){
 }
 const LEGEND=`<details class="legend" id="legend"><summary>كيف أقرأ النوتة؟</summary><ul>
  <li>اقرأ من اليمين إلى اليسار، سطراً بسطر. على الآيباد والكمبيوتر العمود اليمين قبل اليسار.</li>
- <li><span class="nt lg">فا</span> نغمة ممدودة · <span class="nt lo">دو</span> قرار (خط تحتها) · <span class="nt hi">ري</span> جواب (خط فوقها) · <span class="lab">لازمة</span> ردّ موسيقي قصير</li>
+ <li><span class="nt lg">فا</span> نغمة ممدودة · <span class="nt lo">دو</span> قرار (خط فوقها) · <span class="nt hi">ري</span> جواب (خط تحتها) · <span class="lab">لازمة</span> ردّ موسيقي قصير</li>
  <li>♭ بيمول · ♯ دييز · ½♭ نصف بيمول (ربع تون) · ½♯ نصف دييز · ♮ طبيعية</li>
  <li><span style="color:var(--caramel);font-weight:700">الكلمة الكراميل</span> أول كلمتين من المقطع لتعرف مكانك، و«↻ أعد المقطع» يعني نغمات مقطع سبق.</li>
  <li>رسم الزند بنفس منظر فيديوهات «عود ثري دي»: المفاتيح يمين والوتر الغليظ فوق، وكل «موضع» نصف تون.</li>
