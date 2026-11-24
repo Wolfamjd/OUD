@@ -131,7 +131,7 @@ button,input{font:inherit;color:inherit}
 .pager .nx{text-align:left}
 
 /* play mode: only the notes, big, screen kept awake */
-body.play .bar,body.play .crumb,body.play .maqam,body.play .pager,body.play .tipnote{display:none}
+body.play .bar,body.play .crumb,body.play .maqam,body.play .pager,body.play .tipnote,body.play .mine,body.play .srh{display:none}
 body.play .s-head h1{font-size:26px}
 body.play .s-head{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;padding-top:8px}
 
@@ -229,6 +229,36 @@ button.cell{cursor:pointer;font:inherit;font-weight:700;font-size:18px}
 #mini a{color:inherit;text-decoration:none;font-variant-numeric:tabular-nums;padding:0 4px}
 #mini .dot{width:10px;height:10px;border-radius:50%;background:var(--honey);opacity:.35}
 #mini .dot.on{opacity:1}
+/* per-song rhythm strip, my status, filters, practice page */
+.srh{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;display:grid;gap:10px}
+.srh .top{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap}
+.srh .top .what{flex:1;min-width:200px;font-size:15px}
+.srh .top .what b{color:var(--deep);font-size:17px}
+.srh .top .what small{color:var(--soft)}
+.srh .ed{display:grid;gap:10px;border-top:1px dashed var(--line);padding-top:10px}
+.srh input[type=number]{width:84px;height:38px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);text-align:center;font-weight:700;font-size:16px}
+.mine{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.badge{display:inline-block;font-size:11.5px;font-weight:700;border-radius:6px;padding:1px 7px;margin-inline-start:6px;vertical-align:middle;background:var(--card);color:var(--deep)}
+.badge.know{background:var(--caramel);color:var(--surface)}
+.fav{color:var(--caramel)}
+.ctas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px;margin-top:16px}
+.ctas .homecta{margin-top:0}
+.filters{margin-top:14px;background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--radius);padding:2px 14px}
+.filters summary{cursor:pointer;font-weight:700;color:var(--deep);padding-block:10px}
+.filters summary small{color:var(--caramel);font-weight:700}
+.filters .in{display:grid;gap:10px;padding-bottom:12px}
+.filters .seg>span{min-width:58px}
+.filters .tool{height:34px;font-size:14px;padding:0 10px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:14px}
+.stat{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--radius);padding:12px 14px}
+.stat b{display:block;font-family:var(--f-display);font-size:34px;color:var(--deep);line-height:1.1;font-variant-numeric:tabular-nums}
+.stat small{color:var(--soft);font-size:13.5px}
+.days{display:grid;grid-template-columns:repeat(14,1fr);gap:4px;align-items:end;height:120px;margin-top:12px;background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--radius);padding:12px 12px 6px}
+.days div{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;font-size:10.5px;color:var(--soft)}
+.days i{display:block;width:100%;max-width:22px;border-radius:5px 5px 2px 2px;background:var(--caramel);min-height:3px}
+.days i.z{background:var(--line-soft)}
+.when{color:var(--soft);font-size:12.5px}
+.xfer textarea{width:100%;min-height:80px;font:12px/1.4 ui-monospace,monospace;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:8px;direction:ltr}
 @media (max-width:560px){
   .tempo{grid-template-columns:1fr auto}
   .tempo .stack{grid-column:1/-1;order:3}
@@ -321,7 +351,8 @@ function sheetHtml(s){
 
 const maqLine=s=>s.maqam?s.maqam.name:'المقام غير مذكور';
 function songCard(s,n){
-  return `<a class="song" href="#s-${s.id}"><span class="n">${n}</span><span class="t"><b>${esc(s.title)}${s.sub?` <small style="display:inline;font-weight:400">· ${esc(s.sub)}</small>`:''}</b><small>${esc(maqLine(s))}</small></span></a>`;
+  const rl=rhLabel(getM(s));
+  return `<a class="song" href="#s-${s.id}"><span class="n">${n}</span><span class="t"><b>${esc(s.title)}${s.sub?` <small style="display:inline;font-weight:400">· ${esc(s.sub)}</small>`:''}${badges(s)}</b><small>${esc(maqLine(s))}${rl?' · '+esc(rl):''} · ${s.diff}</small></span></a>`;
 }
 const LEGEND=`<details class="legend" id="legend"><summary>كيف أقرأ النوتة؟</summary><ul>
  <li>اقرأ من اليمين إلى اليسار، سطراً بسطر. على الآيباد والكمبيوتر العمود اليمين قبل اليسار.</li>
@@ -335,18 +366,42 @@ const app=document.getElementById('app');
 function home(q){
   const total=SONGS.length;
   let h=`<section class="hero"><h1>نوتات العود</h1><p>${total} أغنية لـ${DATA.artists.length} فنانين، مكتوبة بأسماء النغمات مع مقام كل أغنية وأماكنها على الأوتار.</p></section>`;
-  if(q){
-    const n=q.trim().replace(/[إأآ]/g,'ا').replace(/ة/g,'ه');
+  const F=store.get('filters',{});
+  const active=Object.values(F).filter(Boolean).length;
+  if(!q){
+    h+=`<div class="ctas"><a class="homecta" href="#r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l4 18H5z"/><path d="M12 15 17 6"/><path d="M7.5 16h9"/></svg><span><b>الزمن والإيقاع</b><small>مترونوم، ميزان، مؤقت تمرين، وإيقاعات الوحدة والمقسوم والرومبا والعربي.</small></span></a>
+      <a class="homecta" href="#me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span><b>تمريني</b><small>دقائقك كل يوم، أغاني تتعلمها، ومفضلتك، وأغاني تحتاج مراجعة.</small></span></a></div>`;
+    const grp=(key,label,vals)=>`<div class="seg" role="group" aria-label="${label}"><span>${label}</span>${vals.map(v=>`<button class="tool" type="button" data-f="${key}" data-v="${esc(v)}" aria-pressed="${F[key]===v}">${esc(v)}</button>`).join('')}</div>`;
+    const fams=[...new Set(SONGS.map(s=>s.fam))].sort((a,b)=>(a=='غير محدد')-(b=='غير محدد')||a.localeCompare(b,'ar'));
+    const rhs=[...new Set(SONGS.map(s=>rhLabel(getM(s))||'غير محدد'))];
+    h+=`<details class="filters" id="filters"${active?' open':''}><summary>تصفية الأغاني ${active?`<small>· ${active} فلتر</small>`:''}</summary><div class="in">
+      ${grp('fam','المقام',fams)}${grp('rh','الإيقاع',rhs)}${grp('diff','الصعوبة',['سهلة','متوسطة','صعبة'])}${grp('st','حالتي',['مفضلة','أتعلمها','أعرفها'])}
+      ${active?'<div class="seg"><button class="tool" type="button" id="fclear">امسح الفلاتر</button></div>':''}
+      <p style="margin:0;font-size:12.5px;color:var(--soft)">الصعوبة تقدير من النوتة نفسها: طولها، وعدد النغمات، والأرباع، والقفزات بين القرار والجواب.</p></div></details>`;
+  }
+  const match=s=>{const m=getM(s);
+    if(F.fam&&s.fam!==F.fam)return false;
+    if(F.rh&&(rhLabel(m)||'غير محدد')!==F.rh)return false;
+    if(F.diff&&s.diff!==F.diff)return false;
+    if(F.st=='مفضلة'&&!m.fav)return false;if(F.st=='أتعلمها'&&m.st!=='learn')return false;if(F.st=='أعرفها'&&m.st!=='know')return false;
+    return true};
+  if(q||active){
+    const n=(q||'').trim().replace(/[إأآ]/g,'ا').replace(/ة/g,'ه');
     const norm=t=>String(t).replace(/[إأآ]/g,'ا').replace(/ة/g,'ه');
-    const hits=SONGS.filter(s=>norm(s.title+' '+s.artist+' '+maqLine(s)+' '+(s.sub||'')).includes(n));
-    h+=`<section class="shelf"><div class="shelf-head"><h2>نتائج البحث</h2><span style="color:var(--soft)">${hits.length}</span></div>${hits.length?`<div class="songs">${hits.map((s,i)=>songCard(s,i+1).replace('</small></span>',' · '+esc(s.artist)+'</small></span>')).join('')}</div>`:`<p class="empty">ما فيه أغنية بهذا الاسم. جرّب اسم الفنان أو المقام.</p>`}</section>`;
+    const hits=SONGS.filter(s=>(!n||norm(s.title+' '+s.artist+' '+maqLine(s)+' '+(s.sub||'')).includes(n))&&(q||match(s)));
+    h+=`<section class="shelf"><div class="shelf-head"><h2>${q?'نتائج البحث':'الأغاني المطابقة'}</h2><span style="color:var(--soft)">${hits.length}</span></div>${hits.length?`<div class="songs">${hits.map((s,i)=>songCard(s,i+1).replace(/<\/small><\/span><\/a>$/,' · '+esc(s.artist)+'</small></span></a>')).join('')}</div>`:`<p class="empty">${q?'ما فيه أغنية بهذا الاسم. جرّب اسم الفنان أو المقام.':'ما فيه أغنية تطابق كل الفلاتر. شيل واحد منها.'}</p>`}</section>`;
   }else{
-    h+=`<a class="homecta" href="#r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l4 18H5z"/><path d="M12 15 17 6"/><path d="M7.5 16h9"/></svg><span><b>الزمن والإيقاع</b><small>مترونوم، ميزان، مؤقت تمرين، وإيقاعات الوحدة والمقسوم والرومبا والعربي.</small></span></a>`;
     h+=`<nav class="chips" aria-label="الفنانون">${DATA.artists.map(a=>`<a class="chip" href="#a-${a.id}">${esc(a.name)} <span>${a.songs.length}</span></a>`).join('')}</nav>`;
     h+=DATA.artists.map(a=>`<section class="shelf"><div class="shelf-head"><h2>${esc(a.name)}</h2><a href="#a-${a.id}">${a.songs.length} ${a.songs.length>2&&a.songs.length<11?'أغاني':'أغنية'} ←</a></div><div class="songs">${a.songs.map((s,i)=>songCard(s,i+1)).join('')}</div></section>`).join('');
   }
   h+=LEGEND+`<p class="foot">المصادر: قنوات «نوتات» لعبادي الجوهر ومحمد عبده وطلال مداح على تلقرام، ودروس «عود ثري دي». الكلمات غير منسوخة، تظهر فقط أول كلمتين من كل مقطع.</p>`;
   app.innerHTML=h;document.title='نوتات العود';
+  const fl=document.getElementById('filters');
+  if(fl)fl.onclick=e=>{const b=e.target.closest('button');if(!b)return;
+    const F=store.get('filters',{});
+    if(b.id=='fclear')store.set('filters',{});
+    else{const k=b.dataset.f,v=b.dataset.v;F[k]=F[k]===v?'':v;store.set('filters',F)}
+    const y=scrollY;home('');scrollTo(0,y)};
 }
 function artist(a){
   app.innerHTML=`<div class="crumb"><a href="#">الرئيسية</a> ‹ <span>${esc(a.name)}</span></div>
@@ -367,7 +422,9 @@ function song(s){
     mq=`<section class="maqam" aria-label="المقام"><div><b>${esc(m.name)}</b>${m.src?`<span class="src">${esc(m.src)}</span>`:''}
       <div class="scale">${m.scale.map((t,k)=>`<span class="${k==0||k==m.scale.length-1?'t':''}">${noteName(t)}</span>`).join('')}${(m.pass||[]).map(t=>`<span class="p">${noteName(t)}</span>`).join('')}</div>
       ${s.mood?`<p>${esc(s.mood)}</p>`:''}</div>${m.fb&&m.fb.length?`<div class="fbbox">${fretboard(m.fb)}</div>`:''}</section>`;
-  }else mq=`<p class="note-plain">${m?esc(m.name):'المقام غير مذكور في المصدر.'}</p>`;
+  }else mq=`<section class="maqam" aria-label="النغمات" style="grid-template-columns:minmax(0,1fr)"><div><b>${m?esc(m.name):'المقام غير مذكور في المصدر'}</b><span class="src">النغمات المستخدمة في هالنوتة، من القرار للجواب:</span>
+      <div class="scale">${s.used.map(u=>`<span>${esc(u.n)}${u.a?`<sup>${esc(u.a)}</sup>`:''}</span>`).join('')}</div></div></section>`;
+  const my=getM(s);
   app.innerHTML=`<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#a-${a.id}">${esc(a.name)}</a></div>
   <div class="s-head"><div><h1>${esc(s.title)}</h1><div class="who">${esc(a.name)}${s.sub?' · '+esc(s.sub):''}</div></div>
    <div class="tools" role="toolbar" aria-label="أدوات العرض">
@@ -377,6 +434,13 @@ function song(s){
     <button class="tool" id="metro" type="button" aria-pressed="${E.on}" aria-label="تشغيل المترونوم مع الأغنية">مترونوم</button>
     <button class="tool" id="play" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>وضع العزف</button>
    </div></div>
+  <div class="mine" role="group" aria-label="حالتي مع الأغنية">
+    <button class="tool" type="button" data-my="fav" aria-pressed="${!!my.fav}">${my.fav?'★':'☆'} مفضلة</button>
+    <button class="tool" type="button" data-my="learn" aria-pressed="${my.st=='learn'}">أتعلمها</button>
+    <button class="tool" type="button" data-my="know" aria-pressed="${my.st=='know'}">أعرفها</button>
+    <span class="when" style="align-self:center">${my.last?(daysAgo(my.last)==0?'تمرنت عليها اليوم':'آخر تمرين قبل '+daysAgo(my.last)+' يوم'):''}${my.mins?` · ${Math.round(my.mins)} دقيقة كلها`:''} · ${s.diff}</span>
+  </div>
+  <section class="srh" id="srh" aria-label="إيقاع الأغنية وسرعتها"></section>
   ${mq}
   <article class="sheet ${cols==='one'?'':'auto'}" id="sheet" style="--notes:${fs}px">${sheetHtml(s)}</article>
   ${s.tip?`<p class="tipnote">${esc(s.tip)}</p>`:''}
@@ -388,8 +452,12 @@ function song(s){
   document.getElementById('smaller').onclick=()=>size(-2);
   document.getElementById('bigger').onclick=()=>size(2);
   document.getElementById('cols').onclick=e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);sheet.classList.toggle('auto',on);store.set('cols',on?'auto':'one')};
-  document.getElementById('metro').onclick=e=>{toggleRz();e.currentTarget.setAttribute('aria-pressed',E.on);document.getElementById('mini').classList.toggle('show',E.on)};
-  document.getElementById('play').onclick=e=>{const on=!document.body.classList.contains('play');document.body.classList.toggle('play',on);e.currentTarget.setAttribute('aria-pressed',on);e.currentTarget.lastChild.textContent=on?'إنهاء العزف':'وضع العزف';setWake(on);window.scrollTo(0,0)};
+  document.getElementById('metro').onclick=()=>{if(E.on)stopRz();else if(getM(s).rh)startSong(s,false);else startRz();syncSongMetro()};
+  bindSrh(s);
+  document.querySelector('.mine').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.my,m=getM(s);
+    if(k=='fav'){setM(s,{fav:!m.fav});b.setAttribute('aria-pressed',!m.fav);b.textContent=(!m.fav?'★':'☆')+' مفضلة'}
+    else{const v=m.st===k?null:k;setM(s,{st:v});document.querySelectorAll('.mine [data-my="learn"],.mine [data-my="know"]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.my===v))}};
+  document.getElementById('play').onclick=e=>{const on=!document.body.classList.contains('play');playLog(s,on);document.body.classList.toggle('play',on);e.currentTarget.setAttribute('aria-pressed',on);e.currentTarget.lastChild.textContent=on?'إنهاء العزف':'وضع العزف';setWake(on);window.scrollTo(0,0)};
 }
 
 /* ───────── rhythm & time: engine (Web Audio lookahead scheduler) ───────── */
@@ -470,6 +538,7 @@ function startRz(){
 function stopRz(done){
   if(!E.on)return;E.on=false;clearInterval(E.timer);cancelAnimationFrame(E.raf);E.q=[];
   const mins=(Date.now()-E.t0)/60000;const day=new Date().toISOString().slice(0,10);const log=store.get('rz-log',{});log[day]=(log[day]||0)+mins;store.set('rz-log',log);
+  if(E.song){logSong(E.song,mins);S.tr=!!E.prevTr;saveS();E.song=null}
   if(done===true&&E.ctx){const t=E.ctx.currentTime+.05;[0,.18,.36].forEach((d,i)=>{const o=E.ctx.createOscillator();o.type='sine';o.frequency.value=[880,1108,1318][i];o.connect(envG(t+d,.5,.5));o.start(t+d);o.stop(t+d+.55)})}
   if(!document.body.classList.contains('play'))setWake(false);
   syncRunUI(done===true?'انتهى وقت التمرين 👏':'');
@@ -548,7 +617,7 @@ function deskHtml(){
      <div class="seg"><span>الصوت</span><input type="range" id="vol" min="0" max="1" step=".05" value="${S.vol}" aria-label="مستوى الصوت" style="max-width:260px"></div>
      <div class="opt"><h4>عدّ تمهيدي ${sw('cin',S.countIn)}</h4><p>مازورة نقرات قبل ما يبدأ، عشان تجهّز الريشة.</p></div>
      <div class="opt"><h4>مدرّب السرعة ${sw('tr',S.tr)}</h4><p>يبدأ من سرعتك الحالية ويزيد شوي شوي لين يوصل الهدف.</p>
-       <div class="nums">زِد <select id="trInc">${[1,2,3,5,10].map(v=>`<option${v==S.trInc?' selected':''}>${v}</option>`).join('')}</select> كل <select id="trEvery">${[2,4,8,16].map(v=>`<option${v==S.trEvery?' selected':''}>${v}</option>`).join('')}</select> مازورات لين <select id="trTarget">${[60,80,90,100,110,120,140,160,180,200].map(v=>`<option${v==S.trTarget?' selected':''}>${v}</option>`).join('')}</select></div></div>
+       <div class="nums">زِد <select id="trInc">${[1,2,3,5,10].map(v=>`<option${v==S.trInc?' selected':''}>${v}</option>`).join('')}</select> كل <select id="trEvery">${[2,4,8,16].map(v=>`<option${v==S.trEvery?' selected':''}>${v}</option>`).join('')}</select> مازورات لين <select id="trTarget">${[...new Set([60,80,90,100,110,120,140,160,180,200,S.trTarget])].sort((a,b)=>a-b).map(v=>`<option${v==S.trTarget?' selected':''}>${v}</option>`).join('')}</select></div></div>
      <div class="opt"><h4>اختبار الثبات ${sw('gap',S.gap)}</h4><p>يعزف معك مازورات ويسكت مازورات وأنت تكمّل. إذا رجع الصوت وأنت معه بالضبط، يعني زمنك ثابت.</p>
        <div class="nums">يعزف <select id="gapPlay">${[1,2,4].map(v=>`<option${v==S.gapPlay?' selected':''}>${v}</option>`).join('')}</select> ويسكت <select id="gapMute">${[1,2,4].map(v=>`<option${v==S.gapMute?' selected':''}>${v}</option>`).join('')}</select></div></div>
    </div>
@@ -668,15 +737,146 @@ function rhythmPage(){
   app.querySelectorAll('[data-load]').forEach(b=>b.onclick=()=>{const k=b.dataset.load;S.mode='rhythm';if(S.rh!==k)S.bpm=RH[k].bpm;S.rh=k;saveS();if(E.on)E.step=0;renderDesk();
     document.getElementById('desk').scrollIntoView({behavior:'smooth',block:'start'});if(!E.on)startRz()});
 }
+/* ───────── personal: per-song rhythm, status, practice log (all saved on this device) ───────── */
+const sk=s=>s.artist+'|'+s.title+'|'+(s.sub||'');           // stable key: song ids shift when songs are added
+const SONG_DEF={ // only what a source states
+  'القلب يعشق كل جميل':{rh:'maqsum',src:'MaqamWorld'},
+  'بعيد عنك':{rh:'wahda',src:'MaqamWorld'},
+  'أهواك':{rh:'metro',meter:'2/4',src:'الفيديو'},
+  'وطني الحبيب':{rh:'arabi',src:'المدونة'}
+};
+const META=()=>store.get('song-meta',{});
+const getM=s=>Object.assign({},SONG_DEF[s.title]||{},META()[sk(s)]||{});
+const setM=(s,patch)=>{const all=META(),k=sk(s);all[k]=Object.assign(all[k]||{},patch);store.set('song-meta',all)};
+const today=()=>new Date().toISOString().slice(0,10);
+const daysAgo=d=>d?Math.round((new Date(today())-new Date(d))/864e5):null;
+const rhLabel=m=>!m.rh?'':m.rh=='metro'?'ميزان '+(m.meter||'4/4'):(RH[m.rh]?RH[m.rh].name:'');
+const fullBpm=m=>m.bpm||(m.rh&&RH[m.rh]?RH[m.rh].bpm:80);
+const pracBpm=m=>m.prac||Math.max(40,Math.round(fullBpm(m)*.75/2)*2);
+function logSong(key,mins){const all=META();const e=all[key]||{};e.last=today();e.mins=(e.mins||0)+mins;all[key]=e;store.set('song-meta',all)}
+function startSong(s,practice){
+  const m=getM(s);if(!m.rh)return;
+  if(E.on)stopRz();
+  if(m.rh=='metro'){S.mode='metro';S.meter=m.meter||'4/4'}else{S.mode='rhythm';S.rh=m.rh}
+  const full=fullBpm(m),pr=pracBpm(m);E.prevTr=S.tr;
+  if(practice&&pr<full){S.bpm=pr;S.tr=true;S.trTarget=full;S.trEvery=4;S.trInc=full-pr>24?5:2}else{S.bpm=full;S.tr=false}
+  E.song=sk(s);saveS();startRz();
+}
+// difficulty is a rough guess from the notes themselves: length, range of notes, quarter tones, octave jumps
+function analyse(s){
+  const ns=[];s.blocks.forEach(b=>(b.rows||[]).forEach(r=>(r.items||[]).forEach(i=>{if(i.t=='note')ns.push(i)})));
+  const ORD=['دو','ري','مي','فا','صول','لا','سي'];const set=new Map();
+  ns.forEach(i=>String(i.n).split('+').forEach(n=>{const k=n+(i.a||'');if(!set.has(k))set.set(k,{n,a:i.a||''})}));
+  s.used=[...set.values()].sort((x,y)=>ORD.indexOf(x.n)-ORD.indexOf(y.n));
+  const qt=ns.filter(i=>(i.a||'').includes('½')).length,oct=ns.filter(i=>i.o).length;
+  let sc=0;if(ns.length>110)sc++;if(ns.length>240)sc++;if(set.size>9)sc++;if(qt)sc++;if(oct>3)sc++;
+  s.diff=sc<=1?'سهلة':sc==2?'متوسطة':'صعبة';
+  const FAM=['نهاوند','بيات','راست','صبا','عجم','كرد','حجاز','سيكا'],nm=s.maqam&&s.maqam.name||'';
+  const f=FAM.find(f=>nm.includes(f));s.fam=f?(f=='بيات'?'بياتي':f):'غير محدد';
+}
+SONGS.forEach(analyse);
+const stLabel={learn:'أتعلمها',know:'أعرفها'};
+const badges=s=>{const m=getM(s);return `${m.fav?'<span class="fav" aria-label="مفضلة"> ★</span>':''}${m.st?`<span class="badge ${m.st}">${stLabel[m.st]}</span>`:''}`};
+
+function srhHtml(s,edit){
+  const m=getM(s),has=!!m.rh;
+  let h=`<div class="top">`;
+  if(has){const full=fullBpm(m),pr=pracBpm(m),guess=!m.bpm;
+    h+=`<div class="what"><b>${esc(rhLabel(m))}</b> · سرعتها <b>${full}</b> <small>${guess?'(تقديرية، اضبطها)':''}${m.src&&!META()[sk(s)]?.rh?' · الإيقاع من '+esc(m.src):''}</small><br><small>تمرين: تبدأ من ${pr} وتزيد لين ${full}</small></div>
+      <button class="tool" type="button" data-sg="prac">▶ تمرين</button><button class="tool" type="button" data-sg="full">▶ بسرعتها</button>`;
+  }else h+=`<div class="what"><b>الإيقاع والسرعة</b><br><small>ما حددناها لهالأغنية بعد. حددها مرة وتنحفظ.</small></div>`;
+  h+=`<button class="tool" type="button" data-sg="edit" aria-expanded="${!!edit}">${has?'تعديل':'حدّدها'}</button></div>`;
+  if(edit){
+    const cur=m.rh=='metro'?'metro:'+(m.meter||'4/4'):m.rh||'';
+    const opts=[...Object.keys(RH).map(k=>[k,RH[k].name]),...Object.keys(METERS).map(k=>['metro:'+k,'مترونوم '+k])];
+    h+=`<div class="ed">
+      <div class="seg" role="group" aria-label="إيقاع الأغنية"><span>الإيقاع</span>${opts.map(([v,l])=>`<button class="tool" type="button" data-srh="${v}" aria-pressed="${v===cur}">${l}</button>`).join('')}</div>
+      <div class="seg"><span>سرعتها</span><input type="number" id="sbpm" min="30" max="240" value="${m.rh?fullBpm(m):''}" placeholder="—" inputmode="numeric"><button class="tool" type="button" id="stap">انقر مع الأغنية</button><small style="color:var(--soft)">شغّل الأغنية وانقر مع النبض</small></div>
+      <div class="seg"><span>تبدأ التمرين من</span><input type="number" id="sprac" min="30" max="240" value="${m.rh?pracBpm(m):''}" placeholder="—" inputmode="numeric"></div>
+      <div class="seg"><button class="tool" type="button" data-sg="save" style="background:var(--honey);border-color:var(--caramel);color:var(--honey-ink)">احفظ</button><button class="tool" type="button" data-sg="cancel">إلغاء</button></div>
+    </div>`;
+  }
+  return h;
+}
+function bindSrh(s){
+  const box=document.getElementById('srh');let pick=null,taps=[];
+  const draw=edit=>{box.innerHTML=srhHtml(s,edit);pick=null};
+  draw(false);
+  box.onclick=e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.srh){pick=b.dataset.srh;box.querySelectorAll('[data-srh]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+      const sb=document.getElementById('sbpm');if(!sb.value&&RH[pick])sb.value=RH[pick].bpm;return}
+    if(b.id=='stap'){const n=performance.now();taps=taps.filter(x=>n-x<2500);taps.push(n);
+      if(taps.length>1){const v=Math.round(60000/((taps[taps.length-1]-taps[0])/(taps.length-1)));document.getElementById('sbpm').value=Math.max(30,Math.min(240,v));
+        document.getElementById('sprac').value=Math.max(40,Math.round(v*.75/2)*2)}return}
+    const a=b.dataset.sg;
+    if(a=='prac'||a=='full'){startSong(s,a=='prac');syncSongMetro();return}
+    if(a=='edit')return draw(b.getAttribute('aria-expanded')!=='true');
+    if(a=='cancel')return draw(false);
+    if(a=='save'){const m=getM(s),v=pick||(m.rh=='metro'?'metro:'+(m.meter||'4/4'):m.rh);
+      if(!v){b.textContent='اختر الإيقاع أول';return}
+      const bpm=+document.getElementById('sbpm').value||null,pr=+document.getElementById('sprac').value||null;
+      const patch=v.startsWith('metro:')?{rh:'metro',meter:v.slice(6)}:{rh:v,meter:null};
+      if(bpm)patch.bpm=Math.max(30,Math.min(240,bpm));if(pr)patch.prac=Math.max(30,Math.min(240,pr));
+      setM(s,patch);draw(false)}
+  };
+}
+function syncSongMetro(){const b=document.getElementById('metro');if(b)b.setAttribute('aria-pressed',E.on);document.getElementById('mini').classList.toggle('show',E.on&&location.hash!=='#r')}
+
+function mePage(){
+  const log=store.get('rz-log',{}),meta=META(),t=today();
+  const dkey=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10)};
+  const last14=[...Array(14)].map((_,i)=>dkey(13-i)),vals=last14.map(k=>Math.round(log[k]||0)),mx=Math.max(10,...vals);
+  let streak=0;for(let i=(log[t]>=1?0:1);;i++){if((log[dkey(i)]||0)>=1)streak++;else break}
+  const week=last14.slice(7).reduce((a,k)=>a+(log[k]||0),0);
+  const withM=SONGS.map(s=>({s,m:getM(s)}));
+  const fav=withM.filter(x=>x.m.fav),learn=withM.filter(x=>x.m.st=='learn').sort((a,b)=>(a.m.last||'').localeCompare(b.m.last||''));
+  const review=withM.filter(x=>x.m.st=='know'&&(!x.m.last||daysAgo(x.m.last)>=14)).sort((a,b)=>(a.m.last||'').localeCompare(b.m.last||''));
+  const when=m=>m.last?(daysAgo(m.last)==0?'تمرنت عليها اليوم':daysAgo(m.last)==1?'آخر تمرين أمس':'آخر تمرين قبل '+daysAgo(m.last)+' يوم'):'ما تمرنت عليها بالمترونوم بعد';
+  const list=(arr,empty)=>arr.length?`<div class="songs">${arr.map((x,i)=>`<a class="song" href="#s-${x.s.id}"><span class="n">${i+1}</span><span class="t"><b>${esc(x.s.title)}${badges(x.s)}</b><small>${esc(x.s.artist)} · <span class="when">${when(x.m)}</span></small></span></a>`).join('')}</div>`:`<p class="empty" style="padding:14px 0">${empty}</p>`;
+  const DOW=['ح','ن','ث','ر','خ','ج','س'];
+  app.innerHTML=`<div class="crumb"><a href="#">الرئيسية</a> ‹ <span>تمريني</span></div>
+  <section class="rz-hero"><h1>تمريني</h1><p>كل شي هنا محفوظ في هالجهاز. الدقائق تنحسب لما يشتغل المترونوم أو وضع العزف.</p></section>
+  <div class="stats"><div class="stat"><b>${Math.round(log[t]||0)}</b><small>دقيقة اليوم</small></div><div class="stat"><b>${Math.round(week)}</b><small>دقيقة آخر 7 أيام</small></div><div class="stat"><b>${streak}</b><small>${streak==1?'يوم':'أيام'} ورا بعض</small></div><div class="stat"><b>${withM.filter(x=>x.m.st=='know').length}</b><small>أغنية تعرفها</small></div></div>
+  <div class="days" aria-label="دقائق التمرين آخر 14 يوم">${last14.map((k,i)=>`<div title="${k}: ${vals[i]} دقيقة"><i class="${vals[i]?'':'z'}" style="height:${Math.max(3,vals[i]/mx*80)}px"></i>${DOW[new Date(k).getDay()]}</div>`).join('')}</div>
+  <h2 class="r-h2">راجعها <small style="font-size:14px;color:var(--soft);font-family:var(--f-body)">أغاني تعرفها وصار لك أسبوعين أو أكثر ما عزفتها</small></h2>${list(review,'ما فيه شي يحتاج مراجعة. علّم أغانيك بـ«أعرفها» من صفحة الأغنية.')}
+  <h2 class="r-h2">أتعلمها <small style="font-size:14px;color:var(--soft);font-family:var(--f-body)">الأقدم تمريناً أول</small></h2>${list(learn,'علّم أي أغنية بـ«أتعلمها» من صفحتها وتطلع هنا.')}
+  <h2 class="r-h2">المفضلة</h2>${list(fav,'اضغط ☆ في صفحة أي أغنية.')}
+  <details class="lesson xfer" style="margin-top:24px"><summary>انقل بياناتك لجهاز ثاني <small>من الآيفون للآيباد مثلاً</small></summary><div class="in">
+    <p>اضغط «انسخ»، أرسل النص لنفسك، وفي الجهاز الثاني الصقه هنا واضغط «استورد».</p>
+    <div class="seg"><button class="tool" type="button" id="xcopy">انسخ بياناتي</button><button class="tool" type="button" id="ximp">استورد</button><span id="xmsg" style="color:var(--caramel);min-width:0"></span></div>
+    <textarea id="xbox" aria-label="بيانات النقل" placeholder="الصق هنا"></textarea></div></details>`;
+  document.title='تمريني · نوتات العود';
+  const KEYS=['song-meta','rz-log','rz','rz-custom','rz-arabi'];
+  document.getElementById('xcopy').onclick=async()=>{const o={};KEYS.forEach(k=>o[k]=store.get(k,null));const code=btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+    const box=document.getElementById('xbox');box.value=code;box.select();let ok=false;try{await navigator.clipboard.writeText(code);ok=true}catch(e){}
+    document.getElementById('xmsg').textContent=ok?'نسخته ✓':'انسخ النص من المربع'};
+  document.getElementById('ximp').onclick=()=>{const msg=document.getElementById('xmsg');
+    try{const o=JSON.parse(decodeURIComponent(escape(atob(document.getElementById('xbox').value.trim()))));
+      const cur=META();const inc=o['song-meta']||{};for(const k in inc)cur[k]=Object.assign(cur[k]||{},inc[k]);store.set('song-meta',cur);
+      const lg=store.get('rz-log',{});const il=o['rz-log']||{};for(const k in il)lg[k]=Math.max(lg[k]||0,il[k]);store.set('rz-log',lg);
+      ['rz','rz-custom','rz-arabi'].forEach(k=>{if(o[k]!=null)store.set(k,o[k])});
+      msg.textContent='تم ✓';setTimeout(()=>location.reload(),600)}catch(e){msg.textContent='النص مو صحيح'}};
+}
+
 document.getElementById('mminus').onclick=()=>setBpm(S.bpm-2);
 document.getElementById('mplus').onclick=()=>setBpm(S.bpm+2);
 document.getElementById('mstop').onclick=()=>stopRz();
 
+// play mode counts as practice once it lasts a minute (the metronome already logs its own time)
+let playT=null,playS=null;
+function playLog(s,on){
+  if(on){playT=Date.now();playS=s;return}
+  if(playT&&playS){const mins=(Date.now()-playT)/60000;
+    if(mins>=1){logSong(sk(playS),mins);if(!E.on){const log=store.get('rz-log',{}),d=today();log[d]=(log[d]||0)+mins;store.set('rz-log',log)}}}
+  playT=null;playS=null;
+}
 function route(){
+  if(document.body.classList.contains('play'))playLog(null,false);
   document.body.classList.remove('play');if(!E.on)setWake(false);
   const h=decodeURIComponent(location.hash.slice(1));
   const q=document.getElementById('q');
   if(h==='r'){q.value='';rhythmPage()}
+  else if(h==='me'){q.value='';mePage()}
   else if(h.startsWith('s-')&&byId(h.slice(2))){q.value='';song(byId(h.slice(2)))}
   else if(h.startsWith('a-')&&artistById(h.slice(2))){q.value='';artist(artistById(h.slice(2)))}
   else home(q.value);
