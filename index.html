@@ -287,6 +287,7 @@ button.cell{cursor:pointer;font:inherit;font-weight:700;font-size:18px}
 .tlev i{position:absolute;inset:0 auto 0 0;width:0;background:var(--soft);border-radius:5px;transition:width .06s linear}
 .tlev.on i{background:#2E9B4F}
 .tlev b{position:absolute;top:0;bottom:0;width:2px;background:var(--deep);opacity:.55}
+.tmicw[hidden]{display:none}
 .tmicw{display:flex;gap:8px;align-items:center;justify-content:center;font-size:14px;color:var(--soft)}
 .tmicw select{height:36px;max-width:260px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:inherit;font:inherit;padding:0 8px}
 .tstr{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
@@ -1142,7 +1143,8 @@ function tunerDetect(){
   else{TS.jump.push(f);if(TS.jump.length>1&&Math.abs(cents2(f,TS.jump[0]))>35)TS.jump=[f];if(TS.jump.length>=3){TS.hist=TS.jump.slice();TS.jump=[]}else return}
   if(TS.hist.length<2)return;
   // trimmed mean around the median: steadier than the median alone
-  const md=med(TS.hist),keep=TS.hist.filter(v=>Math.abs(cents2(v,md))<8),fm=keep.reduce((a,b)=>a+b,0)/keep.length;
+  const md=med(TS.hist),keep=TS.hist.filter(v=>Math.abs(cents2(v,md))<8),fm=keep.length?keep.reduce((a,b)=>a+b,0)/keep.length:md;
+  if(!isFinite(fm)||fm<=0)return;
   TS.last=now;
   const midi=69+12*Math.log2(fm/T.a4);
   // nearest note under the chosen temperament
@@ -1197,6 +1199,7 @@ function drawTape(){
 }
 function setOdo(v){
   const box=document.getElementById('todo');if(!box)return;
+  if(!isFinite(v))v=0;
   const s=Math.min(9999.9,v).toFixed(1).padStart(6,'0').replace('.','');
   box.querySelectorAll('.odr').forEach((r,i)=>{const d=+s[i];if(r._d!==d){r._d=d;r.style.transform=`translateY(${-d*10}%)`}});
 }
@@ -1213,6 +1216,7 @@ function tunerLoop(ts){
   if(TS.on)tunerDetect();
   const dt=Math.min(.05,(ts-(TV.t||ts))/1000);TV.t=ts;
   const k=1-Math.exp(-dt/(Math.abs(TV.tgt-TV.pos)>3?.06:.11));       // smooth glide, a bit faster for big jumps
+  if(!isFinite(TV.tgt))TV.tgt=60;if(!isFinite(TV.pos))TV.pos=TV.tgt;if(!isFinite(TV.tc))TV.tc=0;if(!isFinite(TV.cents))TV.cents=0;
   TV.pos+=(TV.tgt-TV.pos)*k;TV.cents+=((TV.live?TV.tc:TV.cents)-TV.cents)*k;
   drawTape();paintMeter();
   if(TV.live)setOdo(TV.hz);
