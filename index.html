@@ -265,6 +265,7 @@ button.cell{cursor:pointer;font:inherit;font-weight:700;font-size:18px}
 .tmeter .lab{position:absolute;top:4px;font:700 11px/1 var(--f-body);color:#EEE;opacity:.8}
 .tmeter.ok .fill{background:linear-gradient(180deg,#7FD49A,#36A35A)}
 .tmeter.dim .dia,.tmeter.dim .fill{opacity:.25}
+.tmeter.held .dia,.tmeter.held .fill{opacity:.6}
 .ttapebox{position:relative;height:150px;border-radius:0 0 8px 8px;overflow:hidden;background:linear-gradient(180deg,#E7DDCB,#FFFDF6 18%,#FFFDF6 82%,#E2D7C3);box-shadow:inset 0 6px 10px -6px rgba(0,0,0,.45),inset 0 -6px 10px -6px rgba(0,0,0,.45)}
 .ttapebox canvas{position:absolute;inset:0;width:100%;height:100%}
 .ttapebox .rl{position:absolute;top:-30px;bottom:0;left:50%;width:3px;margin-left:-1.5px;background:linear-gradient(90deg,#B01C14,#F0453A,#B01C14);z-index:2;box-shadow:0 0 4px rgba(200,30,20,.5)}
@@ -1077,7 +1078,7 @@ async function tunerStart(){
     // keep the oud's range only: cut rumble below ~45 Hz and hiss above ~2 kHz
     const hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=48;hp.Q.value=.7;const hp2=ctx.createBiquadFilter();hp2.type='highpass';hp2.frequency.value=48;hp2.Q.value=.7;hp.connect(hp2);
     const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2000;lp.Q.value=.6;
-    TS.an=ctx.createAnalyser();TS.an.fftSize=4096;TS.an.smoothingTimeConstant=0;
+    TS.an=ctx.createAnalyser();TS.an.fftSize=8192;TS.an.smoothingTimeConstant=0;
     const n50=ctx.createBiquadFilter();n50.type='notch';n50.frequency.value=50;n50.Q.value=5;const n60=ctx.createBiquadFilter();n60.type='notch';n60.frequency.value=60;n60.Q.value=6;
     src.connect(hp);hp2.connect(n50);n50.connect(n60);n60.connect(lp);lp.connect(TS.an);TS.src=src;
     TS.buf=new Float32Array(TS.an.fftSize);TS.on=true;TS.hist=[];TS.jump=[];TS.fdb=null;TS.sess=null;TS.t0=performance.now();TS.ok=false;setWake(true);
@@ -1113,29 +1114,41 @@ function tunerDetect(){
   // first 0.4 s after the mic opens: just learn the room
   if(TS.fdb==null||now-TS.t0<400){TS.fdb=TS.fdb==null||TS.fdb<-120?db:TS.fdb+(db-TS.fdb)*.3;TS.ref=db;TS.gate=Math.max(cfg.db,TS.fdb+6);paintLevel(TS.lvl);return}
   if(!TS.sess)TS.fdb+=(db-TS.fdb)*(db<TS.fdb?.2:.012);
-  const gate=Math.max(cfg.db,TS.fdb+4);TS.gate=gate;paintLevel(TS.lvl);
+  const SS=curP().str,lockHz=T.lock!=null&&SS[T.lock]?SS[T.lock].hz:0;
+  // a chosen string lets us listen harder: we know roughly what note to expect
+  const gate=lockHz?Math.max(cfg.db-6,TS.fdb+3):Math.max(cfg.db,TS.fdb+4);TS.gate=gate;paintLevel(TS.lvl);
   // a pluck = the level jumps well above what it was a moment ago. Each pluck starts a fresh reading.
   if(db>gate&&(db>TS.ref+4.5||(!TS.sess&&db>TS.fdb+12))){
-    if(!TS.sess||db>TS.ref+4.5){TS.sess={peak:db,t:now};TS.hist=[];TS.jump=[];TS.skip=now+70}}
+    if(!TS.sess||db>TS.ref+4.5){TS.sess={peak:db,t:now};TS.hist=[];TS.jump=[];TS.skip=now+70;TV.held=false}}
   TS.ref+=(db-TS.ref)*.15;
   const quiet=()=>{if(TS.sess&&now-TS.last>450&&now-TS.sess.t>450)TS.sess=null;
-    if(now-TS.last>1500){TV.live=false;TS.hist=[];TS.jump=[]}};
+    if(now-TS.last>1500){
+      // keep the last reading on screen (dimmed meter stays where it was) so you can see it while turning the peg
+      if(TV.live&&TV.hz>0){TV.held=true;TV.heldT=now;const m=document.getElementById('tmsg');if(m&&!/آخر قراءة/.test(m.textContent))m.textContent+=' · آخر قراءة'}
+      if(TV.held&&now-TV.heldT>12000)TV.held=false;
+      TV.live=false;TS.hist=[];TS.jump=[]}};
   if(TS.sess){TS.sess.peak=Math.max(TS.sess.peak,db);if(db<Math.max(gate+1,TS.sess.peak-48))TS.sess=null}
   if(!TS.sess||now<TS.skip)return quiet();
+  // deep strings (below ~125 Hz) get twice the listening window (~170 ms): steadier cents, a little more delay
+  const cur=TS.hist.length?med(TS.hist):0,deep=(lockHz&&lockHz<125)||(cur&&cur<125);
+  const W=deep?N:N>>1,o=N-W;
   // remove DC then analyse
-  let mean=0;for(let i=0;i<N;i++)mean+=x[i];mean/=N;const y=new Float32Array(N);for(let i=0;i<N;i++)y[i]=x[i]-mean;
-  const r=pitchMPM(y,E.ctx.sampleRate,cfg.cl);
+  let mean=0;for(let i=o;i<N;i++)mean+=x[i];mean/=W;const y=new Float32Array(W);for(let i=0;i<W;i++)y[i]=x[o+i]-mean;
+  const r=pitchMPM(y,E.ctx.sampleRate,lockHz?Math.min(cfg.cl,.4):cfg.cl);
   if(!r)return quiet();
   let f=r.f,tracked=false;
+  // chosen string: take the strongest peak within ±3 semitones of it (can't jump an octave, hears weaker notes)
+  if(lockHz&&!TS.hist.length){const want=r.sr/lockHz,c=r.P.filter(p=>Math.abs(1200*Math.log2(want/p.l))<300&&p.v>=.4);
+    if(c.length){const b=c.reduce((a,p)=>p.v>a.v?p:a);f=r.sr/b.l;tracked=true}
+    else if(r.cl<cfg.cl)return quiet()}
   // follow the note we're already on: if its own peak is still there, use it (stops a fading note sliding onto hum)
   if(TS.hist.length){const want=r.sr/med(TS.hist),c=r.P.filter(p=>Math.abs(1200*Math.log2(want/p.l))<45&&p.v>=.45);
     if(c.length){const b=c.reduce((a,p)=>p.v>a.v?p:a);f=r.sr/b.l;tracked=true}}
   // octave guard: a voice mic loses the deep fundamental, so the reading can jump an octave up.
-  const SS=curP().str,near=h=>SS.some(s=>Math.abs(cents2(h,s.hz))<70);
-  const lockHz=T.lock!=null&&SS[T.lock]?SS[T.lock].hz:0;
+  const near=h=>SS.some(s=>Math.abs(cents2(h,s.hz))<70);
   const v2=r.at(r.lag*2),stable=TS.hist.length?med(TS.hist):0;
   if(!tracked&&v2>.55&&f/2>40){
-    const lowFits=lockHz?Math.abs(cents2(f/2,lockHz))<Math.abs(cents2(f,lockHz)):(near(f/2)&&!near(f));
+    const lowFits=lockHz?Math.abs(cents2(f/2,lockHz))<100&&Math.abs(cents2(f,lockHz))>100:(near(f/2)&&!near(f));
     if(lowFits||(stable&&Math.abs(cents2(f/2,stable))<60))f/=2;
   }
   // stabilise: accept readings close to the current note; switch note only after 3 agreeing readings
@@ -1151,7 +1164,7 @@ function tunerDetect(){
   let n=Math.round(midi);const dev=k=>(midi-k)*100-tempOff(k);
   if(Math.abs(dev(n+1))<Math.abs(dev(n)))n++;else if(Math.abs(dev(n-1))<Math.abs(dev(n)))n--;
   const cents=dev(n);
-  TV.tgt=n+T.tr+cents/100;TV.tc=cents;TV.hz=fm;TV.live=true;
+  TV.tgt=n+T.tr+cents/100;TV.tc=cents;TV.hz=fm;TV.live=true;TV.held=false;
   // strings: which string is it, and is it in tune
   const msg=document.getElementById('tmsg');const tol=T.tol;
   const cOf=i=>cents2(fm,SS[i].hz);
@@ -1205,10 +1218,10 @@ function setOdo(v){
 }
 function paintMeter(){
   const m=document.getElementById('tmeter');if(!m)return;
-  const c=Math.max(-50,Math.min(50,TV.cents)),x=50+c,ok=TV.live&&Math.abs(TV.tc)<=T.tol;
+  const c=Math.max(-50,Math.min(50,TV.cents)),x=50+c,ok=(TV.live||TV.held)&&Math.abs(TV.tc)<=T.tol;
   m.querySelector('.dia').style.left=x+'%';
   const f=m.querySelector('.fill');f.style.left=Math.min(50,x)+'%';f.style.width=Math.abs(c)+'%';
-  m.classList.toggle('ok',ok);m.classList.toggle('dim',!TV.live);
+  m.classList.toggle('ok',ok);m.classList.toggle('dim',!TV.live&&!TV.held);m.classList.toggle('held',!!TV.held);
 }
 function tunerLoop(ts){
   if(!document.getElementById('ttape')){cancelAnimationFrame(TS.raf);TS.raf=0;return}
@@ -1311,7 +1324,7 @@ function tunerPage(){
     const l=r.querySelector('.pl');if(!l.value.trim())l.value=NAMES.ar[T.acc][+t.value%12];t.value=''}};
   root.onclick=e=>{const b=e.target.closest('button');if(!b)return;
     if(b.id=='tgo')return TS.on?(tunerStop(),tunerSync(),document.getElementById('tmsg').textContent='وقّفت المايك'):tunerStart();
-    if(b.dataset.s!=null){const i=+b.dataset.s;T.lock=T.lock===i?null:i;saveT();
+    if(b.dataset.s!=null){const i=+b.dataset.s;T.lock=T.lock===i?null:i;saveT();TS.hist=[];TS.jump=[];
       document.querySelectorAll('#tstr button').forEach((x,k)=>x.setAttribute('aria-pressed',T.lock===k));
       if(T.lock===i){const h=SS[i].hz;pluck(h);if(!TV.live){TV.tgt=Math.round(mOf(h))+T.tr}}return}
     if(b.dataset.prof){useProfile(b.dataset.prof);store.set('tuner',T);PEDIT=false;return rerender()}
