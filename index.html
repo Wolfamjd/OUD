@@ -166,6 +166,75 @@ body.play .s-head{position:sticky;top:env(safe-area-inset-top,0px);background:va
 .rz-hero{padding-block:22px 4px}
 .rz-hero h1{font-family:var(--f-display);font-size:clamp(30px,6vw,44px);margin:0;color:var(--deep);line-height:1.2}
 .rz-hero p{margin:4px 0 0;color:var(--soft);max-width:62ch}
+/* metronome device */
+.mdesk{background:none;border:none;padding:0;justify-items:center}
+.mdev{position:relative;width:100%;max-width:380px;border-radius:26px;padding:16px 18px 18px;color:#f3f2f5;overflow:hidden;box-sizing:border-box;
+  background:radial-gradient(120% 70% at 50% 0%,#7a797f 0%,#646369 45%,#55545a 100%);
+  box-shadow:0 18px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -2px 0 rgba(0,0,0,.25);font-family:var(--f-body)}
+.mdev::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.18;
+  background:repeating-linear-gradient(45deg,rgba(255,255,255,.06) 0 2px,transparent 2px 5px),repeating-linear-gradient(-45deg,rgba(0,0,0,.08) 0 2px,transparent 2px 5px)}
+.mdev>*{position:relative}
+.mdev>#msheetbox{position:static}
+.mseg{display:flex;margin:0 auto 14px;width:max-content;padding:3px;border-radius:12px;background:#3f3e44;box-shadow:inset 0 2px 4px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.12)}
+.mseg .tool{border:none;background:transparent;color:#d9d8dd;min-height:34px;padding:0 18px;border-radius:9px;font-weight:700;box-shadow:none}
+.mseg .tool[aria-pressed="true"]{background:linear-gradient(#5d5c62,#48474d);color:#fff;box-shadow:0 2px 4px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.15)}
+.mbeats{display:flex;justify-content:center;gap:10px;flex-wrap:nowrap;margin:2px 0 8px}
+.mbeats.pat{gap:5px}
+.mcol{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;flex:1 1 0;max-width:64px;min-width:0;-webkit-tap-highlight-color:transparent}
+span.mcol{cursor:default}
+.mcol .blk{display:grid;gap:3px;width:100%;padding:4px;border-radius:9px;background:linear-gradient(#6d6c72,#5a595f);box-shadow:0 3px 6px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.2);box-sizing:border-box}
+.mcol .blk i{display:block;height:11px;border-radius:4px;background:#8a898f;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),inset 0 -1px 0 rgba(0,0,0,.2)}
+.mcol .blk i.on{background:#2b2530;box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
+.mcol .lab{all:unset;font-size:12px;font-weight:700;color:#d7d6db;line-height:1}
+.more[hidden]{display:none}
+.mcol::after{content:"";display:block;width:100%;height:4px;border-radius:2px;background:transparent;transition:background .08s}
+.mcol.now::after{background:#fff;box-shadow:0 0 10px rgba(255,255,255,.8)}
+.mcol.now .blk i.on{background:#191419}
+.mcol.mute{opacity:.45}
+.mcol:focus-visible .blk{outline:2px solid #fff;outline-offset:2px}
+.mname{text-align:center;font-weight:700;font-size:17px;letter-spacing:.2px;margin:8px 0 12px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.mbtns{display:flex;justify-content:space-around;margin-bottom:10px}
+.mkey{all:unset;box-sizing:border-box;cursor:pointer;width:64px;height:58px;border-radius:15px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px;
+  background:linear-gradient(#706f75,#58575d);box-shadow:0 5px 10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.22),inset 0 -2px 0 rgba(0,0,0,.25);-webkit-tap-highlight-color:transparent;transition:transform .06s}
+.mkey:active,.mkey.hit{transform:translateY(2px);box-shadow:0 2px 4px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.15)}
+.mkey:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.mkey .note{font-size:28px;line-height:1;font-family:"Segoe UI Symbol","Apple Symbols",serif}
+.mkey small{font-size:10px;opacity:.8;margin-top:-6px}
+.mkey .ar{font-size:15px}
+.mkey[aria-pressed="true"]{background:linear-gradient(#4b4a50,#3c3b41);box-shadow:inset 0 3px 6px rgba(0,0,0,.5)}
+.mkey[aria-expanded="true"]{background:linear-gradient(#4b4a50,#3c3b41)}
+.mtempo{display:grid;justify-items:center;line-height:1;margin-top:4px}
+.mtempo small{font-size:16px;color:#f0eff3;font-family:"Segoe UI",system-ui,sans-serif;margin-bottom:4px}
+.mtempo b{font-size:44px;font-family:"Segoe UI",system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:1px}
+.mtempo span{font-size:15px;font-family:"Segoe UI",system-ui,sans-serif;margin-top:2px}
+.mdialw{position:relative;width:min(230px,64vw);aspect-ratio:1;margin:4px auto 0}
+.marr{all:unset;cursor:pointer;position:absolute;top:-6px;width:58px;height:30px;color:#c9c8cd;-webkit-tap-highlight-color:transparent}
+.marr.l{left:-14px}.marr.r{right:-14px}
+.marr svg{width:100%;height:100%;display:block}
+.marr:active{color:#fff}
+.mdial{position:absolute;inset:14%;border-radius:50%;cursor:grab;touch-action:none;outline:none;
+  background:repeating-conic-gradient(from 0deg,rgba(0,0,0,.45) 0 1.2deg,transparent 1.2deg 6deg),radial-gradient(circle,#4a494f 60%,#3c3b40 61%,#57565c 70%,#424146 100%);
+  box-shadow:0 10px 24px rgba(0,0,0,.45),inset 0 2px 3px rgba(255,255,255,.12)}
+.mdial.drag{cursor:grabbing}
+.mdial:focus-visible{box-shadow:0 0 0 3px #fff,0 10px 24px rgba(0,0,0,.45)}
+.mknob{position:absolute;inset:9%;border-radius:50%;background:radial-gradient(circle at 50% 40%,#636268,#4b4a50 70%,#414045);
+  box-shadow:inset 0 2px 2px rgba(255,255,255,.12),inset 0 -6px 12px rgba(0,0,0,.35),0 2px 6px rgba(0,0,0,.5)}
+.mknob i{position:absolute;left:50%;top:14%;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#3a393e;box-shadow:inset 0 2px 3px rgba(0,0,0,.7),0 1px 0 rgba(255,255,255,.15)}
+.mfoot{display:flex;justify-content:space-between;margin-top:-58px;padding:0 2px}
+.mplay svg{width:26px;height:26px}
+.mtap{font-size:18px}
+.msheet{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(#58575d,#4a494f);border-radius:22px 22px 26px 26px;padding:0 14px 14px;
+  box-shadow:0 -10px 30px rgba(0,0,0,.45);animation:msh .18s ease-out;max-height:72%;display:flex;flex-direction:column}
+@keyframes msh{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.mshh{margin:0 -14px 10px;padding:12px;text-align:center;font-weight:700;background:#0e0d10;border-radius:22px 22px 0 0}
+.msho{display:grid;gap:4px;overflow:auto}
+.msho button{all:unset;cursor:pointer;display:flex;justify-content:center;align-items:baseline;gap:10px;padding:10px;border-radius:10px;color:#e8e7ec;font-size:18px}
+.msho button b{font-weight:700}
+.msho button small{font-size:12px;opacity:.75}
+.msho button[aria-pressed="true"]{background:rgba(255,255,255,.14);color:#fff}
+.msho button[disabled]{opacity:.35;cursor:default}
+.mdone{all:unset;cursor:pointer;margin-top:10px;text-align:center;padding:12px;border-radius:14px;background:#141317;color:#fff;font-weight:700}
+.mdesk .status,.mdesk .more{width:100%}
 .desk{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:16px}
 .seg{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .seg>span{font-size:13.5px;color:var(--soft);min-width:64px}
@@ -581,7 +650,7 @@ const RH={
   arabi:{name:'العربي',sig:'4/4',p:'D...T...',bpm:80,src:'',tent:true},
   custom:{name:'إيقاعي الخاص',sig:'4/4',p:'D...T.T.',bpm:90,src:''}
 };
-const METERS={'2/4':{beats:2},'3/4':{beats:3},'4/4':{beats:4},'6/8':{beats:2,six:true}};
+const METERS={'2/4':{beats:2},'3/4':{beats:3},'4/4':{beats:4},'5/4':{beats:5},'6/8':{beats:2,six:true}};
 const S=Object.assign({mode:'metro',bpm:80,meter:'4/4',sub:1,acc:true,rh:'maqsum',vol:.8,click:false,countIn:false,timer:0,
   tr:false,trInc:5,trEvery:4,trTarget:120,gap:false,gapPlay:2,gapMute:2},store.get('rz',{}));
 RH.custom.p=store.get('rz-custom',RH.custom.p);RH.arabi.p=store.get('rz-arabi',RH.arabi.p);
@@ -596,8 +665,8 @@ function audio(){
   E.out.gain.value=S.vol;return E.ctx;
 }
 function envG(t,peak,dec){const g=E.ctx.createGain();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+.003);g.gain.exponentialRampToValueAtTime(.0001,t+dec);g.connect(E.out);return g}
-function click(kind,t){const o=E.ctx.createOscillator();o.type='triangle';o.frequency.value=kind=='acc'?1760:kind=='beat'?1250:900;
-  o.connect(envG(t,kind=='acc'?.9:kind=='beat'?.55:.22,.05));o.start(t);o.stop(t+.07)}
+function click(kind,t){const o=E.ctx.createOscillator();o.type='triangle';o.frequency.value=kind=='acc'?1760:kind=='beat'||kind=='soft'?1250:900;
+  o.connect(envG(t,kind=='acc'?.9:kind=='beat'?.55:kind=='soft'?.2:.22,.05));o.start(t);o.stop(t+.07)}
 function dum(t){const o=E.ctx.createOscillator();o.type='sine';o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(52,t+.22);
   o.connect(envG(t,1,.45));o.start(t);o.stop(t+.5);
   const s=E.ctx.createBufferSource();s.buffer=E.noise;const f=E.ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=900;s.connect(f);f.connect(envG(t,.25,.03));s.start(t);s.stop(t+.05)}
@@ -614,7 +683,8 @@ function playStep(L,step,t){
   if(E.muted)return;
   if(L.pat){const c=L.pat[step];if(c=='D')dum(t);else if(c=='T')tak(t);
     if(S.click&&step%2==0)click(step==0?'acc':'beat',t);return}
-  const isBeat=step%L.per==0;click(isBeat?(step==0&&S.acc?'acc':'beat'):'sub',t);
+  const isBeat=step%L.per==0;
+  if(isBeat){const lv=accs()[Math.floor(step/L.per)]??2;if(lv)click(['','soft','beat','acc'][lv],t)}else click('sub',t);
 }
 function onBar(){
   E.bar++;
@@ -666,20 +736,24 @@ function countLabels(L){ // what you say out loud for each slot
     out.push(k==0?String(b):L.per==2?'و':L.per==3?(k==1?'تا':'تي'):L.per==4?['','ي','و','ا'][k]:'')}
   return out;
 }
-function stepsHtml(){
-  const L=layout(),cnt=countLabels(L),edit=S.mode=='rhythm'&&(S.rh=='custom'||S.rh=='arabi');
-  let h='';for(let i=0;i<L.n;i++){
-    const c=L.pat?L.pat[i]:'.',cls=['cell',i%L.per==0?'beat':'',c=='D'?'d':c=='T'?'t':''].filter(Boolean).join(' ');
-    const lab=L.pat?CH[c]:(i%L.per==0?(i==0&&S.acc&&!L.pat?'●':'○'):'·');
-    h+=`<span class="cellw">${edit?`<button type="button" class="${cls}" data-i="${i}" aria-label="الخانة ${i+1}: ${c=='D'?'دم':c=='T'?'تك':'سكتة'}">${lab}</button>`:`<span class="${cls}" data-i="${i}">${lab}</span>`}<span class="cnt${i%L.per==0?' b':''}">${cnt[i]}</span></span>`;
-    if(L.n>8&&i%L.per==L.per-1&&i<L.n-1)h+='<span class="gapsep"></span>';
-  }
-  return h;
+// accent level per beat: 3 strong, 2 normal, 1 soft, 0 silent (kept per time signature)
+function accs(){const n=METERS[S.meter].beats;S.accs=S.accs||{};let a=S.accs[S.meter];
+  if(!Array.isArray(a)||a.length!==n)a=S.accs[S.meter]=[S.acc===false?2:3,...Array(n-1).fill(2)];return a}
+const ITAL=b=>b<40?'Grave':b<60?'Largo':b<66?'Larghetto':b<76?'Adagio':b<108?'Andante':b<120?'Moderato':b<168?'Allegro':b<200?'Presto':'Prestissimo';
+function stepsHtml(){ // the row of beat columns at the top of the device
+  const L=layout(),edit=S.mode=='rhythm'&&(S.rh=='custom'||S.rh=='arabi');
+  let cols=[];
+  if(L.pat){for(let i=0;i<L.n;i++){const c=L.pat[i];cols.push({i,lv:c=='D'?3:c=='T'?2:0,lab:c=='D'?'دُم':c=='T'?'تك':'·',btn:edit,name:`الخانة ${i+1}: ${c=='D'?'دم':c=='T'?'تك':'سكتة'}`})}}
+  else{const a=accs();for(let b=0;b<a.length;b++)cols.push({i:b*L.per,lv:a[b],lab:String(b+1),btn:true,beat:b,name:`النبضة ${b+1}: ${['صامتة','خفيفة','عادية','قوية'][a[b]]}`})}
+  return cols.map(c=>{const blk=[3,2,1].map(k=>`<i class="${c.lv>=k?'on':''}"></i>`).join('');
+    const inner=`<span class="blk">${blk}</span><span class="lab">${c.lab}</span>`;
+    return c.btn?`<button type="button" class="mcol" data-i="${c.i}"${c.beat!=null?` data-beat="${c.beat}"`:''} aria-label="${c.name}">${inner}</button>`:`<span class="mcol" data-i="${c.i}">${inner}</span>`}).join('');
 }
 function paintStep(q){
   const box=document.getElementById('steps');
-  if(box){box.querySelectorAll('.now').forEach(e=>e.classList.remove('now'));
-    const c=box.querySelector(`[data-i="${q.step}"]`);if(c){c.classList.add('now');c.classList.toggle('mute',q.mute)}}
+  if(box){const L=layout(),i=L.pat?q.step:Math.floor(q.step/L.per)*L.per;
+    if(L.pat||q.step%L.per==0){box.querySelectorAll('.now').forEach(e=>e.classList.remove('now'));
+      const c=box.querySelector(`[data-i="${i}"]`);if(c){c.classList.add('now');c.classList.toggle('mute',q.mute)}}}
   const st=document.getElementById('rzstate');if(st)st.textContent=q.cin?'عدّ تمهيدي…':q.mute?'اسكت وكمّل بالعدّ في راسك':'';
   const d=document.getElementById('mdot');if(d)d.classList.toggle('on',q.step==0);
 }
@@ -688,8 +762,9 @@ function paintClock(){
   el.textContent=E.endAt?'باقي '+mmss((E.endAt-Date.now())/1000):'مضى '+mmss((Date.now()-E.t0)/1000);
 }
 function syncTempoUI(){
-  const b=document.getElementById('bpmv');if(b){b.firstChild.textContent=S.bpm;b.querySelector('small').textContent=tempoName(S.bpm)}
-  const r=document.getElementById('bpmr');if(r&&+r.value!==S.bpm)r.value=S.bpm;
+  const b=document.getElementById('mbpm');if(b){b.textContent=S.bpm;document.getElementById('mterm').textContent=ITAL(S.bpm)}
+  const k=document.getElementById('mknob');if(k)k.style.transform=`rotate(${S.bpm*6}deg)`;
+  const dl=document.getElementById('mdial');if(dl)dl.setAttribute('aria-valuenow',S.bpm);
   const m=document.getElementById('mlabel');if(m)m.textContent=S.bpm+' · '+(S.mode=='rhythm'?RH[S.rh].name:S.meter);
 }
 function syncRunUI(msg){
@@ -702,28 +777,49 @@ function syncRunUI(msg){
 }
 const sw=(id,on)=>`<label class="sw"><input type="checkbox" id="${id}"${on?' checked':''}><i></i></label>`;
 const pick=(name,opts,val,dis)=>opts.map(([v,l])=>`<button class="tool" type="button" data-${name}="${v}" aria-pressed="${String(v)===String(val)}"${dis?' disabled':''}>${l}</button>`).join('');
+const SUBS=[[1,'♩','نبضة'],[2,'♫','نصفين'],[3,'³♫','ثلاثية'],[4,'♬','أرباع']];
+let MSHEET=null; // which picker sheet is open on the device
+function sheetHtml(k){
+  if(!k)return '';
+  let title='',opts=[];
+  if(k=='meter'){title='الميزان';opts=Object.keys(METERS).map(m=>[m,m,'',S.meter==m])}
+  if(k=='sub'){title='تقسيم النبضة';const six=METERS[S.meter].six;opts=SUBS.map(([v,ic,l])=>[v,ic,l,(six?3:S.sub)==v,six&&v!=3])}
+  if(k=='rh'){title='الإيقاع';opts=Object.keys(RH).map(r=>[r,RH[r].name,RH[r].sig+' · '+RH[r].bpm,S.rh==r])}
+  return `<div class="msheet" role="dialog" aria-label="${title}"><div class="mshh">${title}</div><div class="msho">${opts.map(([v,a,b,on,dis])=>
+    `<button type="button" data-pick="${k}" data-v="${v}" aria-pressed="${!!on}"${dis?' disabled':''}><b>${esc(a)}</b>${b?`<small>${esc(b)}</small>`:''}</button>`).join('')}</div>
+    <button type="button" class="mdone" data-pick="done">تم</button></div>`;
+}
 function deskHtml(){
-  const six=METERS[S.meter].six;
-  return `<section class="desk" aria-label="المترونوم">
-   <div class="seg" role="group" aria-label="النوع">${pick('mode',[['metro','مترونوم'],['rhythm','إيقاع']],S.mode)}</div>
-   <div class="tempo">
-     <div class="bpm" id="bpmv">${S.bpm}<small>${tempoName(S.bpm)}</small></div>
-     <div class="stack">
-       <input type="range" id="bpmr" min="30" max="240" value="${S.bpm}" aria-label="السرعة بالنبضة في الدقيقة">
-       <div class="pm">${[-5,-1,1,5].map(d=>`<button class="tool" type="button" data-d="${d}">${d>0?'+':'−'}${Math.abs(d)}</button>`).join('')}<button class="tool" type="button" id="tap">انقر السرعة</button></div>
+  const six=METERS[S.meter].six,rh=S.mode=='rhythm',sub=SUBS.find(x=>x[0]==(six?3:S.sub))||SUBS[0];
+  const arrow=d=>`<svg viewBox="0 0 60 30" aria-hidden="true"><path d="${d<0?'M54 26 Q32 4 8 12':'M6 26 Q28 4 52 12'}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="${d<0?'M8 12 l9 -5 M8 12 l6 8':'M52 12 l-9 -5 M52 12 l-6 8'}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>`;
+  return `<section class="desk mdesk" aria-label="المترونوم">
+   <div class="mdev" dir="ltr">
+     <div class="mseg" role="group" aria-label="النوع">${pick('mode',[['metro','مترونوم'],['rhythm','إيقاع']],S.mode)}</div>
+     <div class="mbeats${layout().pat?' pat':''}" id="steps" dir="rtl">${stepsHtml()}</div>
+     <div class="mname">${rh?esc(RH[S.rh].name)+(RH[S.rh].tent?' (مبدئي)':''):'مترونوم'}</div>
+     <div class="mbtns">
+       ${rh?`<button type="button" class="mkey" data-sheet="rh" aria-label="اختر الإيقاع"><span class="ar">إيقاع</span></button>
+             <button type="button" class="mkey" id="mclk" aria-pressed="${!!S.click}" aria-label="نقرة مع الإيقاع"><span class="note">♩</span><small>نقرة</small></button>`
+          :`<button type="button" class="mkey" data-sheet="meter" aria-label="الميزان ${S.meter}"><span>${S.meter}</span></button>
+             <button type="button" class="mkey" data-sheet="sub" aria-label="تقسيم النبضة: ${sub[2]}"><span class="note">${sub[1]}</span></button>`}
+       <button type="button" class="mkey" id="mmorebtn" aria-expanded="false" aria-label="إعدادات أكثر"><span>•••</span></button>
      </div>
-     <button class="go" id="go" type="button" aria-pressed="false" aria-label="تشغيل"></button>
+     <div class="mtempo"><small id="mterm">${ITAL(S.bpm)}</small><b id="mbpm">${S.bpm}</b><span>BPM</span></div>
+     <div class="mdialw">
+       <button type="button" class="marr l" data-d="-1" aria-label="أبطأ">${arrow(-1)}</button>
+       <button type="button" class="marr r" data-d="1" aria-label="أسرع">${arrow(1)}</button>
+       <div class="mdial" id="mdial" role="slider" tabindex="0" aria-label="السرعة: لفّ القرص" aria-valuemin="30" aria-valuemax="240" aria-valuenow="${S.bpm}"><div class="mknob" id="mknob"><i></i></div></div>
+     </div>
+     <div class="mfoot">
+       <button type="button" class="mkey mplay" id="go" aria-pressed="false" aria-label="تشغيل"></button>
+       <button type="button" class="mkey mtap" id="tap" aria-label="انقر السرعة"><span>Tap</span></button>
+     </div>
+     <div id="msheetbox">${sheetHtml(MSHEET)}</div>
    </div>
-   ${S.mode=='metro'
-     ?`<div class="seg" role="group" aria-label="الميزان"><span>الميزان</span>${pick('meter',Object.keys(METERS).map(k=>[k,k]),S.meter)}</div>
-       <div class="seg" role="group" aria-label="تقسيم النبضة"><span>التقسيم</span>${pick('sub',[[1,'نبضة'],[2,'نصفين'],[3,'ثلاثية'],[4,'أرباع']],six?3:S.sub,six)}</div>
-       <div class="seg"><span>النبضة الأولى</span>${sw('acc',S.acc)}<small style="color:var(--soft)">أقوى صوتاً عشان تعرف بداية المازورة</small></div>`
-     :`<div class="seg" role="group" aria-label="الإيقاع"><span>الإيقاع</span>${pick('rh',Object.keys(RH).map(k=>[k,RH[k].name]),S.rh)}</div>
-       <div class="seg"><span>مع المترونوم</span>${sw('clk',S.click)}<small style="color:var(--soft)">نقرة على كل نبضة فوق الدم والتك</small></div>
-       ${S.rh=='custom'||S.rh=='arabi'?`<p style="margin:0;font-size:13.5px;color:var(--soft)">اضغط أي خانة تحت لتغيّرها: سكتة ← دم ← تك.${S.rh=='arabi'?' «العربي» هنا مبدئي: عدّله إذا تعرف ضرباته.':''}</p>`:''}`}
-   <div class="steps${layout().n>8?' wrap':''}" id="steps" dir="rtl">${stepsHtml()}</div>
+   ${rh&&(S.rh=='custom'||S.rh=='arabi')?`<p style="margin:0;font-size:13.5px;color:var(--soft);text-align:center">اضغط أي عمود فوق لتغيّره: سكتة ← دم ← تك.${S.rh=='arabi'?' «العربي» هنا مبدئي: عدّله إذا تعرف ضرباته.':''}</p>`
+     :!rh?`<p style="margin:0;font-size:13.5px;color:var(--soft);text-align:center">اضغط أي عمود فوق تغيّر قوة النبضة: قوية، عادية، خفيفة، صامتة. لفّ القرص أو اسحبه تغيّر السرعة.</p>`:''}
    <div class="status"><span id="rzstate"></span><span id="rzclock"></span><span>تمرّنت اليوم <b id="rztoday">${todayMin()}</b> دقيقة</span></div>
-   <div class="more">
+   <div class="more" id="mmore" hidden>
      <div class="seg" role="group" aria-label="مؤقت التمرين"><span>المؤقت</span>${pick('timer',[[0,'بدون'],[5,'5 د'],[10,'10 د'],[15,'15 د'],[20,'20 د'],[30,'30 د']],S.timer)}</div>
      <div class="seg"><span>الصوت</span><input type="range" id="vol" min="0" max="1" step=".05" value="${S.vol}" aria-label="مستوى الصوت" style="max-width:260px"></div>
      <div class="opt"><h4>عدّ تمهيدي ${sw('cin',S.countIn)}</h4><p>مازورة نقرات قبل ما يبدأ، عشان تجهّز الريشة.</p></div>
@@ -734,32 +830,48 @@ function deskHtml(){
    </div>
   </section>`;
 }
+let MMORE=false;
 function bindDesk(){
   const root=document.getElementById('desk');
+  const mm=document.getElementById('mmore'),mb=document.getElementById('mmorebtn');if(mm){mm.hidden=!MMORE;mb.setAttribute('aria-expanded',MMORE)}
   root.onclick=e=>{
     const b=e.target.closest('button');if(!b)return;
     if(b.id=='go')return toggleRz();
     if(b.dataset.d)return setBpm(S.bpm+ +b.dataset.d);
-    if(b.id=='tap'){const n=performance.now();E.taps=(E.taps||[]).filter(x=>n-x<2500);E.taps.push(n);
+    if(b.id=='tap'){const n=performance.now();E.taps=(E.taps||[]).filter(x=>n-x<2500);E.taps.push(n);b.classList.remove('hit');void b.offsetWidth;b.classList.add('hit');
       if(E.taps.length>1){const iv=(E.taps[E.taps.length-1]-E.taps[0])/(E.taps.length-1);setBpm(60000/iv)}return}
+    if(b.id=='mmorebtn'){MMORE=!MMORE;mm.hidden=!MMORE;b.setAttribute('aria-expanded',MMORE);if(MMORE)mm.scrollIntoView({behavior:'smooth',block:'nearest'});return}
+    if(b.id=='mclk'){S.click=!S.click;saveS();b.setAttribute('aria-pressed',S.click);return}
+    if(b.dataset.sheet){MSHEET=MSHEET==b.dataset.sheet?null:b.dataset.sheet;document.getElementById('msheetbox').innerHTML=sheetHtml(MSHEET);return}
+    if(b.dataset.pick){const k=b.dataset.pick;if(k=='done'){MSHEET=null;return renderDesk()}
+      let v=b.dataset.v;if(k=='sub')v=+v;if(k=='rh'&&S.rh!==v)S.bpm=RH[v].bpm;S[k]=v;saveS();if(E.on)E.step=0;
+      return renderDesk()}
+    if(b.dataset.beat!=null&&S.mode=='metro'){const a=accs(),i=+b.dataset.beat;a[i]=(a[i]+3)%4;saveS();document.getElementById('steps').innerHTML=stepsHtml();return}
     if(b.dataset.i!==undefined&&(S.rh=='custom'||S.rh=='arabi')&&S.mode=='rhythm'){
       const r=RH[S.rh],i=+b.dataset.i,nx={'.':'D',D:'T',T:'.'}[r.p[i]];r.p=r.p.slice(0,i)+nx+r.p.slice(i+1);store.set('rz-'+S.rh,r.p);
       document.getElementById('steps').innerHTML=stepsHtml();return}
-    for(const k of ['mode','meter','sub','rh','timer']){if(b.dataset[k]!==undefined){
-      let v=b.dataset[k];if(k=='sub'||k=='timer')v=+v;
-      if(k=='rh'&&S.rh!==v)S.bpm=RH[v].bpm;
+    for(const k of ['mode','timer']){if(b.dataset[k]!==undefined){
+      let v=b.dataset[k];if(k=='timer')v=+v;
       S[k]=v;saveS();if(E.on&&k!='timer'){E.step=0}
       if(k=='timer'&&E.on)E.endAt=v?E.t0+v*60000:0;
-      renderDesk();return}}
+      MSHEET=null;renderDesk();return}}
   };
   root.oninput=e=>{const t=e.target;
-    if(t.id=='bpmr')setBpm(+t.value);
     if(t.id=='vol'){S.vol=+t.value;if(E.out)E.out.gain.value=S.vol;saveS()}};
   root.onchange=e=>{const t=e.target;
-    const map={acc:'acc',clk:'click',cin:'countIn',tr:'tr',gap:'gap'};
+    const map={cin:'countIn',tr:'tr',gap:'gap'};
     if(map[t.id]){S[map[t.id]]=t.checked;if(t.id=='gap'&&!t.checked)E.muted=false;saveS()}
-    if(['trInc','trEvery','trTarget','gapPlay','gapMute'].includes(t.id)){S[t.id]=+t.value;saveS()}
-    if(t.id=='acc')document.getElementById('steps').innerHTML=stepsHtml();};
+    if(['trInc','trEvery','trTarget','gapPlay','gapMute'].includes(t.id)){S[t.id]=+t.value;saveS()}};
+  // the dial: drag around it (or wheel / arrow keys). One tick = 6° = 1 BPM.
+  const dial=document.getElementById('mdial');if(!dial)return;
+  let last=null,acc=0;
+  const ang=e=>{const r=dial.getBoundingClientRect();return Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2))*180/Math.PI};
+  dial.onpointerdown=e=>{dial.setPointerCapture(e.pointerId);last=ang(e);acc=0;dial.classList.add('drag');e.preventDefault()};
+  dial.onpointermove=e=>{if(last==null)return;const a=ang(e);let d=a-last;if(d>180)d-=360;if(d<-180)d+=360;last=a;acc+=d;
+    const steps=Math.trunc(acc/6);if(steps){acc-=steps*6;setBpm(S.bpm+steps)}};
+  dial.onpointerup=dial.onpointercancel=()=>{last=null;dial.classList.remove('drag')};
+  dial.onwheel=e=>{e.preventDefault();setBpm(S.bpm+(e.deltaY<0?1:-1))};
+  dial.onkeydown=e=>{const k={ArrowUp:1,ArrowRight:1,ArrowDown:-1,ArrowLeft:-1,PageUp:5,PageDown:-5}[e.key];if(k){e.preventDefault();setBpm(S.bpm+k)}};
 }
 function renderDesk(){document.getElementById('desk').innerHTML=deskHtml();bindDesk();syncRunUI()}
 
