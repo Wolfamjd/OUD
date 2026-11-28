@@ -1003,13 +1003,15 @@ const fromTuning=(id,name,ms)=>({id,name,a4:440,tol:5,names:'ar',order:'lh',acc:
   str:ms.map((m,i)=>({l:NAMES.ar.f[m%12]+(i==0&&ms.length>5?' قرار':i==ms.length-1&&ms.length>5?' جواب':''),hz:hzOf(m,440)}))});
 const DEF_PROFILES=[
   {id:'mustaqbal',name:'فنان المستقبل',a4:390,tol:10,names:'solf',order:'lh',acc:'f',temp:'equal',tkey:0,tr:0,
-   str:[{l:'صول قرار',hz:86.8},{l:'لا',hz:97.6},{l:'ري',hz:130.2},{l:'صول جواب',hz:173.9},{l:'دو',hz:231.9}]},
+   str:[{l:'فا قرار',hz:77.4},{l:'صول قرار',hz:86.8},{l:'لا',hz:97.6},{l:'ري',hz:130.2},{l:'صول جواب',hz:173.9},{l:'دو',hz:231.9}]},
   fromTuning('fafa','فا فا (ستة أوتار)',TUNINGS.fafa.s),
   fromTuning('arabic','دو قرار',TUNINGS.arabic.s),
   fromTuning('old','عربي قديم',TUNINGS.old.s)
 ];
 let PROFILES=store.get('tuner-profiles',null)||JSON.parse(JSON.stringify(DEF_PROFILES));
 const saveProfiles=()=>store.set('tuner-profiles',PROFILES);
+// your oud has six strings: add «فا قرار» to the saved «فنان المستقبل» if it still has the original five
+(()=>{const m=PROFILES.find(p=>p.id==='mustaqbal');if(m&&m.str.length===5&&m.str.map(x=>x.hz).join()==='86.8,97.6,130.2,173.9,231.9'){m.str.unshift({l:'فا قرار',hz:77.4});saveProfiles()}})();
 const T=Object.assign({prof:'mustaqbal',a4:440,names:'ar',acc:'f',order:'lh',tr:0,tol:5,tkey:0,temp:'equal',lock:null},store.get('tuner',{}));
 const curP=()=>PROFILES.find(p=>p.id===T.prof)||PROFILES[0];
 function useProfile(id){T.prof=id;const p=curP();T.prof=p.id;PSET.forEach(k=>{if(p[k]!=null)T[k]=p[k]});T.lock=null}
@@ -1034,11 +1036,11 @@ function fft(re,im,inv){const n=FF.n,rv=FF.rev;
     for(let i=0;i<n;i+=sz)for(let j=0,k=0;j<h;j++,k+=st){const wr=FF.c[k],wi=inv?FF.s[k]:-FF.s[k],a=i+j,b=a+h;
       const tr=re[b]*wr-im[b]*wi,ti=re[b]*wi+im[b]*wr;re[b]=re[a]-tr;im[b]=im[a]-ti;re[a]+=tr;im[a]+=ti}}}
 // McLeod pitch method. Returns {f, cl, nsdf, lag} or null. Full window (type II NSDF) via FFT autocorrelation.
-function pitchMPM(x,sr,minCl){
+function pitchMPM(x,sr,minCl,fmin){
   const N=x.length,n=N*2;fftInit(n);const re=FF.re,im=FF.im;
   for(let i=0;i<n;i++){re[i]=i<N?x[i]:0;im[i]=0}
   fft(re,im,false);for(let i=0;i<n;i++){re[i]=re[i]*re[i]+im[i]*im[i];im[i]=0}fft(re,im,true);
-  const maxLag=Math.min(N>>1,Math.floor(sr/40)),minLag=Math.floor(sr/1500);
+  const maxLag=Math.min(N>>1,Math.floor(sr/(fmin||40))),minLag=Math.floor(sr/1500);
   const ns=new Float32Array(maxLag+2);let m=0;for(let i=0;i<N;i++)m+=2*x[i]*x[i];
   for(let t=0;t<=maxLag+1;t++){if(t>0)m-=x[t-1]*x[t-1]+x[N-t]*x[N-t];ns[t]=m>1e-12?2*(re[t]/n)/m:0}
   // candidates: every local maximum after the first dip (hum can keep the NSDF from ever going negative)
@@ -1144,10 +1146,12 @@ function tunerDetect(){
   if(!TS.sess||now<TS.skip)return quiet();
   // deep strings (below ~125 Hz) get twice the listening window (~170 ms): steadier cents, a little more delay
   const cur=TS.hist.length?med(TS.hist):0,deep=(lockHz&&lockHz<125)||(cur&&cur<125);
-  const W=deep?N:N>>1,o=N-W;
+  const W=deep&&now-TS.sess.t>250?N:N>>1,o=N-W;
+  // ignore anything well below your deepest string: that's two strings ringing together, not a note
+  const lowS=SS.length?Math.min(...SS.map(x=>x.hz)):55,fmin=Math.max(40,Math.min(lowS,lockHz||lowS)*.8);
   // remove DC then analyse
   let mean=0;for(let i=o;i<N;i++)mean+=x[i];mean/=W;const y=new Float32Array(W);for(let i=0;i<W;i++)y[i]=x[o+i]-mean;
-  const r=pitchMPM(y,E.ctx.sampleRate,lockHz?Math.min(cfg.cl,.4):cfg.cl);
+  const r=pitchMPM(y,E.ctx.sampleRate,lockHz?Math.min(cfg.cl,.4):cfg.cl,fmin);
   if(r){TS.dbg.f=r.f;TS.dbg.cl=r.cl}
   if(!r)return quiet();
   let f=r.f,tracked=false;
